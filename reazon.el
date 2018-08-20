@@ -39,6 +39,8 @@
   (require 'cl-lib)
   (defalias 'gensym 'cl-gensym))
 
+(defvar reazon-occurs-check t)
+
 ;; -- Variables --
 
 ;; Reazon variables need to be distinct from Lisp symbols. They are
@@ -102,7 +104,7 @@ indicate substitution failure.")
 
 (defun reazon--extend (var val sub)
   "Associate VAR and VAL in SUB."
-  (if (reazon--occurs-p var val sub)
+  (if (and reazon-occurs-check (reazon--occurs-p var val sub))
       reazon--false
     (cons `(,var . ,val) sub)))
 
