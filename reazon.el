@@ -237,6 +237,33 @@ This primitive goal succeeds if they both do."
      goal-2
      (funcall goal-1 stream))))
 
+(defun reazon--ifte (test consq alt)
+  ""
+  (declare (indent 1))
+  (lambda (s)
+    (reazon--ifte-help (funcall test s) consq alt)))
+
+(defun reazon--ifte-help (stream consq alt)
+  ""
+  (cond
+   ((null stream) (funcall alt stream))
+   ((functionp stream)
+    (lambda () (reazon--ifte-help (funcall stream) consq alt)))
+   (t (reazon--append-map consq stream))))
+
+(defun reazon--once (goal)
+  ""
+  (lambda (s)
+    (reazon--once-help (funcall goal s))))
+
+(defun reazon--once-help (stream)
+  ""
+  (cond
+   ((null stream) '())
+   ((functionp stream)
+    (lambda () (reazon--once-help (funcall stream))))
+   (t `(,(car stream)))))
+
 (defun reazon--run-goal (goal)
   "Pull GOAL with the empty stream."
   (reazon--pull (funcall goal nil)))
@@ -371,6 +398,28 @@ This will raise an error if the query has infinitely many solutions."
 (defmacro reazon-conde (&rest goal-lists)
   "Chain together each GOAL-LISTS as a disjunction of conjunctions."
   `(reazon-disj ,@(mapcar (lambda (arm) `(reazon-conj ,@arm)) goal-lists)))
+
+(defmacro reazon-conda (&rest goal-lists)
+  ""
+  (let* ((first-goal-list (car goal-lists))
+         (rest-goal-lists (cdr goal-lists))
+         (first-goal (car first-goal-list))
+         (rest-goals (cdr first-goal-list)))
+    (if (eq first-goal 't)
+        `(reazon-conj ,@rest-goals)
+      `(reazon--ifte ,first-goal
+         (reazon-conj ,@rest-goals)
+         (reazon-conda ,@rest-goal-lists)))))
+
+(defmacro reazon-condu (&rest goal-lists)
+  ""
+  (let* ((first-goal-list (car goal-lists))
+         (rest-goal-lists (cdr goal-lists))
+         (first-goal (car first-goal-list))
+         (rest-goals (cdr first-goal-list)))
+    `(reazon-conda
+      ((reazon--once ,first-goal) ,@rest-goals)
+      ,@rest-goal-lists)))
 
 (defmacro reazon-defrel (name varlist &rest goals)
   "Define relation NAME with args VARLIST and body GOALS."

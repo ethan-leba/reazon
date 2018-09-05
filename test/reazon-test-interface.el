@@ -168,6 +168,86 @@
   (reazon--should-equal '()
     (reazon-run* q (reazon-disj))))
 
+(ert-deftest reazon-test-interface-conda ()
+  (reazon--should-equal '()
+    (reazon-run* q (reazon-conda (#'reazon-!U #'reazon-!S) (t #'reazon-!U)))
+    (reazon-run* q (reazon-conda (#'reazon-!S #'reazon-!U) (t #'reazon-!S)))
+    (reazon-run* x
+      (reazon-conda
+       ((reazon-== 'virgin x) #'reazon-!U)
+       ((reazon-== 'olive x) #'reazon-!S)
+       (t (reazon-== 'oil x))))
+    (reazon-run* q
+      (reazon-fresh (x y)
+        (reazon-== 'split x)
+        (reazon-== 'pea y)
+        (reazon-conda
+         ((reazon-== 'split x) (reazon-== x y))
+         (t #'reazon-!S)))))
+  (reazon--should-equal '(_0)
+    (reazon-run* q (reazon-conda (#'reazon-!U #'reazon-!S) (t #'reazon-!S)))
+    (reazon-run* q (reazon-conda (#'reazon-!S #'reazon-!S) (t #'reazon-!U)))
+    (reazon-run* q
+      (reazon-fresh (x y)
+        (reazon-== 'split x)
+        (reazon-== 'pea y)
+        (reazon-conda
+         ((reazon-== x y) (reazon-== 'split x))
+         (t #'reazon-!S)))))
+  (reazon--should-equal '(olive)
+    (reazon-run* x
+      (reazon-conda
+       ((reazon-== 'olive x) #'reazon-!S)
+       (t (reazon-== 'oil x))))))
+
+(reazon-defrel reazon--not-pasta (x)
+  (reazon-conda
+   ((reazon-== 'pasta x) #'reazon-!U)
+   (t #'reazon-!S)))
+
+(ert-deftest reazon-test-interface-not-pasta ()
+  (reazon--should-equal '(spaghetti)
+    (reazon-run* x
+      (reazon-conda
+       ((reazon--not-pasta x) #'reazon-!U)
+       ((reazon-== 'spaghetti x) #'reazon-!S)
+       (t #'reazon-!U))))
+  (reazon--should-equal '()
+    (reazon-run* x
+      (reazon-== 'spaghetti x)
+      (reazon-conda
+       ((reazon--not-pasta x) #'reazon-!U)
+       ((reazon-== 'spaghetti x) #'reazon-!S)
+       (t #'reazon-!U)))))
+
+(reazon-defrel reazon--test-onceo (goal)
+  (reazon-condu
+   (goal #'reazon-!S)
+   (t #'reazon-!U)))
+
+(ert-deftest reazon-test-interface-condu ()
+  (reazon--should-equal '(tea)
+    (reazon-run* x
+      (reazon--test-onceo
+       (reazon--test-teacupo x)))))
+
+(ert-deftest reazon-test-interface-condeau ()
+  (reazon--should-equal '(5 tea cup)
+    (reazon-run* q
+      (reazon-conde
+       ((reazon--test-teacupo q) (reazon-== 0 0))
+       ((reazon-== q 5) (reazon-== 0 0)))))
+  (reazon--should-equal '(tea cup)
+    (reazon-run* q
+      (reazon-conda
+       ((reazon--test-teacupo q) (reazon-== 0 0))
+       (t (reazon-== q 5)))))
+  (reazon--should-equal '(tea)
+    (reazon-run* q
+      (reazon-condu
+       ((reazon--test-teacupo q) (reazon-== 0 0))
+       (t (reazon-== q 5))))))
+
 
 (provide 'reazon-test-interface)
 ;;; reazon-test-interface.el ends here
