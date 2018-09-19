@@ -28,6 +28,12 @@
 
 (require 'reazon)
 
+(reazon-defrel reazon--in-range-4 (s)
+  (reazon-membero 1 s)
+  (reazon-membero 2 s)
+  (reazon-membero 3 s)
+  (reazon-membero 4 s))
+
 (defmacro reazon-sudoku-solve-4x4 (&rest coordinate-value-pairs)
   "Solve 4x4 sudoku puzzles, given constraints COORDINATE-VALUE-PAIRS.
 
@@ -54,18 +60,18 @@ solved instances will be generated."
           (lambda (cvp) `(reazon-== ,@cvp))
           coordinate-value-pairs)
 
-       (reazon-subseto range `(,a1 ,a2 ,a3 ,a4))
-       (reazon-subseto range `(,a1 ,b1 ,c1 ,d1))
-       (reazon-subseto range `(,a1 ,a2 ,b1 ,b2))
-       (reazon-subseto range `(,b1 ,b2 ,b3 ,b4))
-       (reazon-subseto range `(,a2 ,b2 ,c2 ,d2))
-       (reazon-subseto range `(,a3 ,b3 ,c3 ,d3))
-       (reazon-subseto range `(,a3 ,a4 ,b3 ,b4))
-       (reazon-subseto range `(,a4 ,b4 ,c4 ,d4))
-       (reazon-subseto range `(,c1 ,c2 ,c3 ,c4))
-       (reazon-subseto range `(,c1 ,c2 ,d1 ,d2))
-       (reazon-subseto range `(,d1 ,d2 ,d3 ,d4))
-       (reazon-subseto range `(,c3 ,c4 ,d3 ,d4)))))
+       (reazon--in-range-4 `(,a1 ,a2 ,a3 ,a4))
+       (reazon--in-range-4 `(,a1 ,b1 ,c1 ,d1))
+       (reazon--in-range-4 `(,a1 ,a2 ,b1 ,b2))
+       (reazon--in-range-4 `(,b1 ,b2 ,b3 ,b4))
+       (reazon--in-range-4 `(,a2 ,b2 ,c2 ,d2))
+       (reazon--in-range-4 `(,a3 ,b3 ,c3 ,d3))
+       (reazon--in-range-4 `(,a3 ,a4 ,b3 ,b4))
+       (reazon--in-range-4 `(,a4 ,b4 ,c4 ,d4))
+       (reazon--in-range-4 `(,c1 ,c2 ,c3 ,c4))
+       (reazon--in-range-4 `(,c1 ,c2 ,d1 ,d2))
+       (reazon--in-range-4 `(,d1 ,d2 ,d3 ,d4))
+       (reazon--in-range-4 `(,c3 ,c4 ,d3 ,d4)))))
 
 
 (defmacro reazon-sudoku-solve-9x9 (&rest coordinate-value-pairs)
